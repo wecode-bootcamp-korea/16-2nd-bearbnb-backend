@@ -3,16 +3,18 @@ from django.db import models
 
 class User(models.Model):
     country        = models.ForeignKey('users.Country', on_delete = models.SET_NULL, null=True)
-    phone          = models.CharField(max_length=20)
+    phone          = models.CharField(max_length=20, null=True)
     name           = models.CharField(max_length=45)
-    gender         = models.CharField(max_length=20)
-    birthdate      = models.DateField()
+    password       = models.CharField(max_length=1000, default='')
+    gender         = models.CharField(max_length=20, null=True)
+    birthdate      = models.DateField(null=True)
     email          = models.EmailField(max_length=200)
     profile_photo  = models.URLField(max_length=2000, null=True)
     is_email_valid = models.BooleanField(default=0)
- 
+    
     class Meta:
-        db_table = 'users' 
+        db_table = 'users'
+
 
 class Host(models.Model):
     user          = models.ForeignKey('users.User', on_delete=models.CASCADE)
