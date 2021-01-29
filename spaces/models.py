@@ -1,6 +1,7 @@
 from django.db    import models
 from users.models import Host
 
+
 class Space(models.Model):
     host         = models.ForeignKey('users.Host', on_delete=models.CASCADE)
     name         = models.CharField(max_length=100)
@@ -32,7 +33,7 @@ class Property(models.Model):
 
 
 class SubProperty(models.Model):
-    space_property = models.ForeignKey('spaces.Property', on_delete=models.CASCADE) 
+    space_property = models.ForeignKey('spaces.Property', on_delete=models.CASCADE)
     name           = models.CharField(max_length=45)
 
     class Meta:
@@ -40,11 +41,10 @@ class SubProperty(models.Model):
 
 
 class Option(models.Model):
-    space    = models.ForeignKey('spaces.Space', on_delete=models.CASCADE)
     name     = models.CharField(max_length=45)
     icon_url = models.URLField(max_length=2000)
 
-    class Mata:
+    class Meta:
         db_table = 'options'
 
 
@@ -100,7 +100,7 @@ class BedType(models.Model):
 
     class Meta:
         db_table = 'bed_types'
-           
+
 
 class Review(models.Model):
     space               = models.ForeignKey('spaces.Space', on_delete=models.CASCADE)
@@ -113,8 +113,8 @@ class Review(models.Model):
     accuracy_score      = models.IntegerField(default=0)
     location_score      = models.IntegerField(default=0)
     value_score         = models.IntegerField(default=0)
-    image_url_score     = models.URLField(max_length=2000)
-    
+    image_url           = models.URLField(max_length=2000)
+
     class Meta:
         db_table = 'reviews'
 
@@ -129,7 +129,23 @@ class Reservation(models.Model):
     children                 = models.IntegerField(null=True)
     infant                   = models.IntegerField(null=True)
     reservation_code         = models.CharField(max_length=45)
-    cancellation_flexibility = models.BooleanField(default=0) 
+    cancellation_flexibility = models.BooleanField(default=0)
 
     class Meta:
         db_table = 'reservations'
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=45)
+
+    class Meta:
+        db_table = "tags"
+
+
+class SpaceTag(models.Model):
+    space = models.ForeignKey('spaces.Space', on_delete=models.CASCADE)
+    tag   = models.ForeignKey('spaces.Tag', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'space_tags'
+

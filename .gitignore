@@ -1,4 +1,9 @@
 my_settings.py
+space_images.csv
+address.xlsx
+seed_users.py
+**/management/commands/*
+directory_uploader.py
 # Created by https://www.toptal.com/developers/gitignore/api/python,pycharm,vscode,vim,macos,linux,zsh
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,pycharm,vscode,vim,macos,linux,zsh
 
