@@ -9,7 +9,7 @@ import my_settings
 from django.http     import JsonResponse
 from django.views    import View
 
-from .models         import User
+from .models         import User, SocialUser
 from my_settings     import SECRET_KEY
 
 
@@ -69,5 +69,26 @@ class SignUpView(View):
             
         except ValueError:
             return JsonResponse({'message':'VALUE_ERROR'}, status=400)
+        except KeyError:
+            return JsonResponse({'message':'KEY_ERROR'}, status=400)
+
+
+class SignInView(View):
+    def post(self, request):
+        try:
+            data     = json.loads(request.body)
+            password = data['password']
+
+            if not User.objects.filter(email=data['email']).exists():
+                return JsonResponse({'message':'USER_DOES_NOT_EXIST'}, status=400)
+            
+            user           = User.objects.get(email=data['email'])
+            password_check = user.password
+
+            if bcrypt.checkpw(password.encode('utf-8'), password_check.encode('utf-8')):
+                token = jwt.encode({'id':user.id}, SECRET_KEY, algorithm='HS256')
+                return JsonResponse({'token':token}, status=200)
+            return JsonResponse({'message':'INVALID_PASSWORD'}, status=401)
+
         except KeyError:
             return JsonResponse({'message':'KEY_ERROR'}, status=400)

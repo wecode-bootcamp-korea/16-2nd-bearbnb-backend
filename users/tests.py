@@ -1,18 +1,20 @@
 import jwt
 import json
-import bcrypt
 import boto3
+import bcrypt
 
 from django.test     import TestCase, Client
-from unittest.mock   import patch
+from unittest.mock   import patch, MagicMock
 
-from .models         import User
+from .models         import User, SocialUser
+from my_settings     import SECRET_KEY
 
 
 client = Client()
 
+@classmethod
 class SignUpTest(TestCase):
-    def setUp(self):
+    def setUpTestData(cls):
         User.objects.create(
             email      = 'yeonu@test.com',
             password   = 'testtest',
@@ -151,3 +153,55 @@ class SignUpTest(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {'message':'INVALID_FORMAT'})
+
+
+class SignInTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        password = 'testtest'.encode('utf-8')
+        password = bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+
+        User.objects.create(
+           email      = 'test@test.com',
+           password   = password,
+           name       = 'test test',
+           country    = None,
+           phone      = None,
+           gender     = None,
+           birthdate  = None,
+        )
+
+    def tearDown(self):
+        User.objects.all().delete()
+
+    def test_signin_post_success(self):
+        user = {
+            'email'   :'test@test.com',
+            'password':'testtest'
+        }
+
+        token    = jwt.encode({'id':User.objects.get(email='test@test.com').id}, SECRET_KEY, algorithm='HS256')
+        response = client.post('/users/signin', json.dumps(user), content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'token':token})
+    
+    def test_signin_post_user_does_not_exist(self):
+        user = {
+            'email'   :'t@test.com',
+            'password':'testtest'
+        }
+        response = client.post('/users/signin', json.dumps(user), content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'message':'USER_DOES_NOT_EXIST'})
+
+    def test_signin_post_invalid_password(self):
+        user = {
+            'email'   :'test@test.com',
+            'password':'wrongpassword'
+        }
+        response = client.post('/users/signin', json.dumps(user), content_type='application/json')
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {'message':'INVALID_PASSWORD'})
