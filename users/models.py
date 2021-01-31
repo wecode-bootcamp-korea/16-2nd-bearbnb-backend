@@ -16,10 +16,17 @@ class User(models.Model):
         db_table = 'users'
 
 
+class SocialUser(models.Model):
+    social_user = models.CharField(max_length=45)
+
+    class Meta:
+        db_table = 'social_users'
+
+
 class Host(models.Model):
     user          = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    profile_photo = models.URLField(max_length=2000)
-    id_card_photo = models.URLField(max_length=2000)
+    profile_photo = models.URLField(max_length=2000, null=True)
+    id_card_photo = models.URLField(max_length=2000, null=True)
 
     class Meta:
         db_table = 'hosts'
