@@ -15,11 +15,7 @@ class Space(models.Model):
     pub_date     = models.DateField(auto_now_add=True)
     is_with_host = models.BooleanField(default=0, null=True)
     cleaning_fee = models.DecimalField(max_digits=18 ,decimal_places=2, null=True)
-    is_work_trip = models.BooleanField(default=0, null=True)
-    trip_purpose = models.CharField(max_length=200, null=True)
-    message      = models.CharField(max_length=1000, null=True)
-    card         = models.CharField(max_length=45, null=True)
-
+    
     class Meta:
         db_table = 'spaces'
 
@@ -134,6 +130,10 @@ class Reservation(models.Model):
     children                 = models.IntegerField(null=True)
     infant                   = models.IntegerField(null=True)
     reservation_code         = models.CharField(max_length=45)
+    is_work_trip             = models.BooleanField(default=0, null=True)
+    trip_purpose             = models.CharField(max_length=200, null=True)
+    message                  = models.CharField(max_length=1000, null=True)
+    card                     = models.CharField(max_length=45, null=True)
 
     class Meta:
         db_table = 'reservations'

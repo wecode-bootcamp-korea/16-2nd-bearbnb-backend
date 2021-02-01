@@ -162,4 +162,5 @@ CORS_ALLOW_HEADERS = (
 #         'django.db.backends': {
 #             'handlers': ['console'],
 #             'level': 'DEBUG',
-#             'propagate': False,
+#             'propagate': False}
+#             }}
