@@ -17,12 +17,10 @@ class SignUpView(View):
     def post(self, request):
         try:
             data            = json.loads(request.POST['json'])
-            password        = data['password'].encode('utf-8')
-            hashed_password = bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
             name            = data['first_name'] + ' ' + data['last_name']
             email_validator = re.compile(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
 
-            if len(password) < 8 or not email_validator.match(data['email']):
+            if len(data['password']) < 8 or not email_validator.match(data['email']):
                 return JsonResponse({'message':'INVALID_FORMAT'}, status=400)
             if User.objects.filter(email=data['email']).exists():
                 return JsonResponse({'message':'USER_ALREADY_EXIST'}, status=400)
@@ -56,7 +54,7 @@ class SignUpView(View):
 
             User(
                 email         = data['email'],
-                password      = hashed_password,
+                password      = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
                 name          = name,
                 profile_photo = image_url,
                 country       = None,
@@ -92,3 +90,35 @@ class SignInView(View):
 
         except KeyError:
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
+
+
+class SocialLoginView(View):
+    def post(self, request):
+        try:
+            social_access_token = request.headers['Authorization']
+            url          = 'https://kapi.kakao.com/v2/user/me'
+            headers      = {
+                'Authorization' : f'Bearer {social_access_token}',
+                'Content-type'  : 'application/x-www-form-urlencoded;charset=utf-8'
+            }
+
+            response        = requests.get(url, headers=headers)
+            social_response = response.json()
+            
+            if social_response.get('code') == -401:
+                return JsonResponse({'message':'INVALID_ACCESS_TOKEN'}, status=401)
+            
+            if not SocialUser.objects.filter(social_user=social_response['id']).exists():
+                SocialUser(
+                    social_user   = social_response['id'],
+                    email         = social_response['kakao_account']['email'],
+                    profile_photo = social_response['properties']['profile_image']
+                ).save()
+
+            access_token = jwt.encode({'id':SocialUser.objects.get(social_user=social_response['id']).id}, SECRET_KEY, algorithm='HS256')
+            return JsonResponse({'access_token':access_token},status=200)
+
+        except ValueError:
+            return JsonResponse({'message':'VALUE_ERROR'}, status=400)
+        except KeyError:
+            return JsonResponse({'message':'KEY_ERROR'}, status=401)

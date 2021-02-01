@@ -17,7 +17,9 @@ class User(models.Model):
 
 
 class SocialUser(models.Model):
-    social_user = models.CharField(max_length=45)
+    social_user   = models.CharField(max_length=45)
+    email         = models.EmailField(max_length=100, null=True)
+    profile_photo = models.URLField(max_length=2000, null=True)
 
     class Meta:
         db_table = 'social_users'

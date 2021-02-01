@@ -12,8 +12,8 @@ from my_settings     import SECRET_KEY
 
 client = Client()
 
-@classmethod
 class SignUpTest(TestCase):
+    @classmethod
     def setUpTestData(cls):
         User.objects.create(
             email      = 'yeonu@test.com',
@@ -205,3 +205,50 @@ class SignInTest(TestCase):
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {'message':'INVALID_PASSWORD'})
+
+
+class SocialLoginTest(TestCase):
+    @patch('users.views.requests')
+    def test_socialLogin_success(self, mock_request):
+        class mock_return:
+            def json(self):
+                return {
+                    'id' : '0123456789',
+                    'kakao_account' : {
+                        'email' : 'test@test.com'
+                    },
+                    'properties':{
+                        'profile_image' : 'test'
+                    }
+                }
+
+        mock_request.get = MagicMock(return_value = mock_return())
+        headers          = {'HTTP_Authorization':'ACCESS_TOKEN'}
+        response         = client.post('/users/social', content_type='application/json', **headers)
+        access_token     = jwt.encode({'id':SocialUser.objects.get(social_user=mock_return.json(self)['id']).id}, SECRET_KEY, algorithm='HS256')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'access_token':access_token})
+
+    def test_socialLogin_key_error(self):
+        
+        headers          = {'Fake_Authorization':'ACCESS_TOKEN'}
+        response         = client.post('/users/social', content_type='application/json', **headers)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {'message':'KEY_ERROR'})
+
+    @patch('users.views.requests')
+    def test_socialLogin_invalid_token(self, mock_request):
+        class mock_return:
+            def json(self):
+                return {
+                    'code': -401
+                }
+
+        mock_request.get = MagicMock(return_value = mock_return())
+        headers          = {'HTTP_Authorization':'ACCESS_TOKEN'}
+        response         = client.post('/users/social', content_type='application/json', **headers)
+        
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {'message':'INVALID_ACCESS_TOKEN'})

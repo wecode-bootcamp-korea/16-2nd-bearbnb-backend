@@ -4,15 +4,21 @@ from users.models import Host
 
 class Space(models.Model):
     host         = models.ForeignKey('users.Host', on_delete=models.CASCADE)
-    name         = models.CharField(max_length=100)
-    price        = models.DecimalField(max_digits=18 ,decimal_places=2)
-    description  = models.CharField(max_length=3000)
+    name         = models.CharField(max_length=100, null=True)
+    price        = models.DecimalField(max_digits=18 ,decimal_places=2, null=True)
+    description  = models.CharField(max_length=3000, null=True)
     place_type   = models.ForeignKey('spaces.PlaceType', on_delete=models.CASCADE)
     sub_property = models.ForeignKey('spaces.SubProperty', on_delete=models.CASCADE)
     max_people   = models.IntegerField(default=0)
     bathroom     = models.IntegerField(default=0)
     rating       = models.DecimalField(max_digits=3, decimal_places=2, null=True)
     pub_date     = models.DateField(auto_now_add=True)
+    is_with_host = models.BooleanField(default=0, null=True)
+    cleaning_fee = models.DecimalField(max_digits=18 ,decimal_places=2, null=True)
+    is_work_trip = models.BooleanField(default=0, null=True)
+    trip_purpose = models.CharField(max_length=200, null=True)
+    message      = models.CharField(max_length=1000, null=True)
+    card         = models.CharField(max_length=45, null=True)
 
     class Meta:
         db_table = 'spaces'
@@ -63,7 +69,7 @@ class Location(models.Model):
     city           = models.CharField(max_length=20)
     address        = models.CharField(max_length=150)
     address_detail = models.CharField(max_length=45)
-    letitude       = models.DecimalField(max_digits=10, decimal_places=6,null=True)
+    latitude       = models.DecimalField(max_digits=10, decimal_places=6,null=True)
     longitude      = models.DecimalField(max_digits=10, decimal_places=6,null=True)
 
     class Meta:
@@ -122,14 +128,12 @@ class Review(models.Model):
 class Reservation(models.Model):
     space                    = models.ForeignKey('spaces.Space', on_delete=models.CASCADE)
     user                     = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    is_with_host             = models.BooleanField(default=0)
     check_in                 = models.DateField()
     check_out                = models.DateField()
     adult                    = models.IntegerField()
     children                 = models.IntegerField(null=True)
     infant                   = models.IntegerField(null=True)
     reservation_code         = models.CharField(max_length=45)
-    cancellation_flexibility = models.BooleanField(default=0)
 
     class Meta:
         db_table = 'reservations'
