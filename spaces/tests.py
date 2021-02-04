@@ -7,6 +7,7 @@ import my_settings
 from spaces.geocode_sample import TEHERANRO, SAMSUNGDONG
 from django.test           import TestCase, Client
 from django.core.mail      import EmailMessage
+from unittest.mock         import patch, MagicMock
    
 from users.models          import User, Host, Country
 from spaces.models         import (Space, Location, Image, Bedroom, 
@@ -144,7 +145,7 @@ class SpaceListViewTest(TestCase):
         {
     "results": [
         {
-            "id":4,
+            "id":5,
             "name": "숙소이름",
             "place_type": "다인실",
             "city": [
@@ -164,8 +165,8 @@ class SpaceListViewTest(TestCase):
             "rating": "5.00",
             "price": "10000.00",
             "space_tag": ["test"],
-            "latitude": ["37.506267"],
-            "longitude": ["127.054067"]
+            "latitude": "37.506267",
+            "longitude": "127.054067"
         }
     ]
         }
@@ -313,13 +314,13 @@ class SpaceDetailViewTest(TestCase):
         Country.objects.all().delete()
 
     def test_get_space_detail_view(self):
-        response = client.get('/spaces/2')
+        response = client.get('/spaces/3')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(),
         {
     "detail_space": [
        {
-         "id": 2,
+         "id": 3,
          "name": "숙소이름",
          "address": "서울시 강남구 삼성동 테헤란로 427",
          "description": "숙소 설명",
@@ -1081,7 +1082,6 @@ class SpacePictureTest(TestCase):
             }
         )
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json(),{"message" : "SPACE_DOES_NOT_EXIST"})
 
 
 class ReservationTest(TestCase):
@@ -1156,8 +1156,8 @@ class ReservationTest(TestCase):
 
     def test_reservation_success(self):
         reservation = {
-            'space'            : 1,
-            'user'             : 1,
+            'space'            : 2,
+            'user'             : 2,
             'check_in'         : "2021-03-03",
             'check_out'        : "2021-03-10",
             'adult'            : 2,
@@ -1174,8 +1174,8 @@ class ReservationTest(TestCase):
 
     def test_reservation_guests_maximun(self):
         reservation = {
-            'space'            : 1,
-            'user'             : 1,
+            'space'            : 2,
+            'user'             : 2,
             'check_in'         : "2021-03-03",
             'check_out'        : "2021-03-10",
             'adult'            : 12,
@@ -1186,15 +1186,15 @@ class ReservationTest(TestCase):
         token      = jwt.encode({'id':User.objects.get(name='test test').id}, SECRET_KEY, algorithm=ALGORITHM)
         headers    = {'HTTP_Authorization':token}
         response   = client.post('/spaces/reserve', json.dumps(reservation), content_type='application/json', **headers)
-        max_people = Space.objects.get(id=1).max_people
+        max_people = Space.objects.get(id=2).max_people
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {'message':f'{max_people}_GUESTS_MAXIMUM'} )
     
     def test_reservation_key_error(self):
         reservation = {
-            '스페이스'           : 1,
-            'user'             : 1,
+            '스페이스'           : 2,
+            'user'             : 2,
             'check_in'         : "2021-03-03",
             'check_out'        : "2021-03-10",
             'adult'            : 2,
@@ -1211,8 +1211,8 @@ class ReservationTest(TestCase):
 
     def test_reservation_already_exists(self):
         reservation = {
-            'space'            : 1,
-            'user'             : 1,
+            'space'            : 2,
+            'user'             : 2,
             'check_in'         : "2021-08-03",
             'check_out'        : "2021-08-10",
             'adult'            : 1,
