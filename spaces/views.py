@@ -63,8 +63,8 @@ class SpaceListView(View):
             "rating"            : space.rating,
             "price"             : space.price,
             "space_tag"         : [tag.tag.name for tag in space.spacetag_set.all()],
-            "latitude"          : [adress.latitude for adress in space.location_set.all()],
-            "longitude"         : [adress.longitude for adress in space.location_set.all()]
+            "latitude"          : [adress.latitude for adress in space.location_set.all()][0],
+            "longitude"         : [adress.longitude for adress in space.location_set.all()][0]
         } 
         for space in spaces[offset:limit]
         ]
