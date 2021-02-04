@@ -1,14 +1,18 @@
+import jwt
 import json
 import uuid
-import jwt
 import boto3
+import random
+import string
+import requests
 import googlemaps
 
-from django.views       import View
-from django.http        import JsonResponse
-from django.db          import transaction
 from django.db.models   import Sum
+from django.views       import View
+from django.db          import transaction
+from django.http        import JsonResponse
 
+import my_settings
 from users.models       import User, Host, Country
 from spaces.models      import (
     Space, 
@@ -23,10 +27,11 @@ from spaces.models      import (
     Option,
     SpaceOption,
     Tag,
-    SpaceTag
+    SpaceTag,
+    Reservation
 )
 from spaces.utils       import login_required, host_required
-import my_settings
+from django.core.mail   import EmailMessage
 
 
 class SpaceListView(View):
@@ -66,6 +71,7 @@ class SpaceListView(View):
         if not results:
             return JsonResponse({"message" : "SPACE_DOES_NOT_EXIST"}, status = 400)
         return JsonResponse({"results" : results}, status = 200)
+
 
 class SpaceDetailView(View):
     def get(self, request, space_id):
@@ -109,6 +115,7 @@ class SpaceDetailView(View):
             return JsonResponse({"detail_space" : room}, status = 200)
         except Space.DoesNotExist:
             return JsonResponse({"message" : "SPACE_DOES_NOT_EXIST"}, status = 400)
+
 
 class HostView(View):
 
@@ -271,3 +278,41 @@ class SpaceImagesView(View):
         except KeyError:
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
 
+
+class ReservationView(View):
+    @login_required
+    @transaction.atomic
+    def post(self, request):
+        try:
+            data             = json.loads(request.body)
+            space            = Space.objects.get(id=data['space'])
+            reservation_code = str(uuid.uuid4())
+            
+            if Reservation.objects.filter(user=request.user, space=space, check_in=data['check_in'], check_out=data['check_out']).exists():
+                return JsonResponse({'message':'RESERVATION_ALREADY_EXIST'}, status=400)
+            if data['adult'] + data.get('children', 0) + data.get('infant', 0) > space.max_people:
+                return JsonResponse({'message':f'{space.max_people}_GUESTS_MAXIMUM'}, status=400)
+
+            Reservation(         
+                space            = space,
+                user             = request.user,
+                check_in         = data['check_in'],
+                check_out        = data['check_out'],
+                adult            = data['adult'],
+                children         = data.get('children'),
+                infant           = data.get('infant'),
+                reservation_code = reservation_code,
+                is_work_trip     = data['is_work_trip'],
+                trip_purpose     = data.get('trip_purpose'),
+                message          = data.get('message'),
+                card             = data['card'],
+            ).save()
+
+            email = EmailMessage(
+                'Reservation Confirm!',
+                f'Reservation Complete. Have a nice trip to {space.name}! \n Reservation code : {reservation_code}',
+                to=[request.user.email])
+            response = email.send()
+            return JsonResponse({'message':'SUCCESS'},status=200)
+        except KeyError:
+            return JsonResponse({'message':'KEY_ERROR'}, status=400)

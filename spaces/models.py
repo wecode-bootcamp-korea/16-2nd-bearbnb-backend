@@ -129,7 +129,7 @@ class Reservation(models.Model):
     adult                    = models.IntegerField()
     children                 = models.IntegerField(null=True)
     infant                   = models.IntegerField(null=True)
-    reservation_code         = models.CharField(max_length=45)
+    reservation_code         = models.CharField(max_length=200)
     is_work_trip             = models.BooleanField(default=0, null=True)
     trip_purpose             = models.CharField(max_length=200, null=True)
     message                  = models.CharField(max_length=1000, null=True)
