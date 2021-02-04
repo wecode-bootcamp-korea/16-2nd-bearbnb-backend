@@ -3,6 +3,7 @@ import json
 import boto3
 import bcrypt
 
+from django.urls     import reverse
 from django.test     import TestCase, Client
 from unittest.mock   import patch, MagicMock
 
@@ -43,7 +44,7 @@ class SignUpTest(TestCase):
         })
 
         form = {
-            'profile_photo': open('/home/yeonu//사진/Screenshot.png','rb'),
+            'profile_photo': open('/home/yeonu/사진/Screenshot.png','rb'),
             'json':user
         }
         response = self.client.post('/users/signup', data=form)

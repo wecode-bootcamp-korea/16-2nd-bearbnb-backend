@@ -1,8 +1,8 @@
 import jwt
+import my_settings
 
 from django.http     import JsonResponse
 
-import my_settings
 from users.models    import User, Host
 
 def login_required(function):
@@ -12,11 +12,11 @@ def login_required(function):
             access_token = request.headers.get("Authorization")
             if not access_token:
                 return JsonResponse({'message': 'LOGIN_REQUIRED'}, status=401)
-            
+
             header = jwt.decode(access_token, my_settings.SECRET_KEY, algorithms=my_settings.ALGORITHM)
             if not User.objects.filter(id = header['id']).exists():
                 return JsonResponse({'message': 'INVALID_USER'}, status=401)
-            
+
             setattr(request, "user", User.objects.get(id = header['id']))
             return function(self, request, *args)
         except jwt.exceptions.DecodeError:
@@ -40,5 +40,3 @@ def host_required(function):
             return JsonResponse({'message': 'JWT_DECODE_ERROR'}, status=400)
 
     return wrapper
-
-
