@@ -1,4 +1,4 @@
-# BearBnB Team Project 
+# 🐻 BearBnB Team Project 🐻
 
 
 ## Team Member
