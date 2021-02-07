@@ -17,6 +17,10 @@
 
 * Git
 
+* AWS : EC2, RDS, S3
+
+* Docker
+
 * JWT, Bcrpyt
 
 * googlemaps
