@@ -4,12 +4,16 @@ boto3==1.16.62
 botocore==1.19.62
 certifi==2020.12.5
 cffi==1.14.4
+chardet==4.0.0
 cryptography==3.3.1
 Django==3.1.5
 django-cors-headers==3.6.0
 django-seed==0.2.2
 et-xmlfile==1.0.1
 Faker==5.8.0
+googlemaps==4.4.2
+gunicorn==20.0.4
+idna==2.10
 jdcal==1.4.1
 jmespath==0.10.0
 mysqlclient==2.0.3
@@ -18,6 +22,7 @@ pycparser==2.20
 PyJWT==2.0.1
 python-dateutil==2.8.1
 pytz==2020.5
+requests==2.25.1
 s3transfer==0.3.4
 six==1.15.0
 sqlparse==0.4.1
