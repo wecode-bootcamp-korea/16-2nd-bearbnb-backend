@@ -5,6 +5,7 @@
 * Frontend : 정민선, 태성현, 김승완
 
 * Backend  : 윤정민, 김건희, 홍연우
+<img src="https://files.slack.com/files-pri/TH0U6FBTN-F01M0DP4AAZ/image_from_ios.jpg">
 
 
 ## Technologies 
